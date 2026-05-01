@@ -1,0 +1,19 @@
+services:
+  php-fpm:
+    build:
+      target: prod
+    volumes: []
+    restart: always
+
+  nginx:
+    image: nginx:${NGINX_IMAGE_TAG}
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+      args:
+        NGINX_IMAGE_TAG: ${NGINX_IMAGE_TAG}
+    volumes: []
+    restart: always
+
+  postgres:
+    ports: []
