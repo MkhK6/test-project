@@ -3,7 +3,7 @@ SHELL := /bin/sh
 COMPOSE_DEV := docker compose
 COMPOSE_PROD := docker compose -f docker-compose.yml -f docker-compose.prod.yaml
 
-.PHONY: init build up down logs ps composer-install migrate test shell \
+.PHONY: init build up down logs ps composer-install migrate test test-db shell \
 	up-prod down-prod logs-prod build-prod ps-prod validate
 
 init:
@@ -31,7 +31,13 @@ composer-install:
 migrate:
 	$(COMPOSE_DEV) exec php-fpm php artisan migrate --force
 
-test:
+test-db:
+	$(COMPOSE_DEV) exec postgres psql -U $${POSTGRES_USER:-laravel} -d $${POSTGRES_DB:-laravel} -tc \
+		"SELECT 1 FROM pg_database WHERE datname = 'laravel_test'" | grep -q 1 \
+		|| $(COMPOSE_DEV) exec postgres psql -U $${POSTGRES_USER:-laravel} -d $${POSTGRES_DB:-laravel} \
+		-c "CREATE DATABASE laravel_test;"
+
+test: test-db
 	$(COMPOSE_DEV) exec php-fpm php artisan test
 
 shell:
