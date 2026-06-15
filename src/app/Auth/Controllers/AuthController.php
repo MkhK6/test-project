@@ -3,23 +3,19 @@
 namespace App\Auth\Controllers;
 
 use App\Auth\Enums\UserRole;
+use App\Auth\Requests\LoginRequest;
+use App\Auth\Requests\RegisterRequest;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Password;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $payload = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', Password::min(8)],
-        ]);
+        $payload = $request->validated();
 
         $user = User::create([
             ...$payload,
@@ -34,12 +30,9 @@ class AuthController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $credentials = $request->validated();
 
         $token = Auth::guard('api')->attempt($credentials);
 
