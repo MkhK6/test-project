@@ -4,11 +4,13 @@ namespace Tests\Feature\Product;
 
 use App\Product\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\InteractsWithAuthentication;
 use Tests\Concerns\InteractsWithProducts;
 use Tests\TestCase;
 
 class UpdateProductTest extends TestCase
 {
+    use InteractsWithAuthentication;
     use InteractsWithProducts;
     use RefreshDatabase;
 
@@ -19,10 +21,10 @@ class UpdateProductTest extends TestCase
             'price' => 1000,
         ]);
 
-        $response = $this->putJson("/api/products/{$product->id}", [
+        $response = $this->patchJson("/api/products/{$product->id}", [
             'name'  => 'Updated Name',
             'price' => 3200,
-        ]);
+        ], $this->adminHeaders());
 
         $response
             ->assertOk()
@@ -38,9 +40,9 @@ class UpdateProductTest extends TestCase
 
     public function test_update_returns_not_found_for_missing_product(): void
     {
-        $response = $this->putJson('/api/products/999999', [
+        $response = $this->patchJson('/api/products/999999', [
             'name' => 'Ghost Product',
-        ]);
+        ], $this->adminHeaders());
 
         $response->assertNotFound();
     }

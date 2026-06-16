@@ -3,11 +3,13 @@
 namespace Tests\Feature\Product;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\InteractsWithAuthentication;
 use Tests\Concerns\InteractsWithProducts;
 use Tests\TestCase;
 
 class StoreProductTest extends TestCase
 {
+    use InteractsWithAuthentication;
     use InteractsWithProducts;
     use RefreshDatabase;
 
@@ -18,7 +20,7 @@ class StoreProductTest extends TestCase
             'price' => 7500,
         ]);
 
-        $response = $this->postJson('/api/products', $payload);
+        $response = $this->postJson('/api/products', $payload, $this->adminHeaders());
 
         $response
             ->assertCreated()
@@ -40,7 +42,7 @@ class StoreProductTest extends TestCase
             'name'     => '',
             'price'    => -10,
             'category' => '',
-        ]);
+        ], $this->adminHeaders());
 
         $response
             ->assertUnprocessable()
